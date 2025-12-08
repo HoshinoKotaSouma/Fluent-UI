@@ -3951,7 +3951,7 @@ Components.TitleBar = (function()
 		}, {
 			New("Frame", {
 				Size = UDim2.new(1, -16, 1, 0),
-				Position = UDim2.new(0, 80, 0, 0),
+				Position = UDim2.new(0, 12, 0, 0),
 				BackgroundTransparency = 1,
 			}, {
 				New("UIListLayout", {
@@ -4021,50 +4021,59 @@ Components.TitleBar = (function()
 				},
 			}),
 		})
--- 1. Nút Close (Màu Đỏ - Ngoài cùng bên trái)
-		TitleBar.CloseButton = BarButton(nil, UDim2.new(0, 10, 0, 13), TitleBar.Frame, function()
+-- ==========================================================
+		-- START: CUSTOM BUTTONS (MAC STYLE ON RIGHT SIDE)
+		-- ==========================================================
+
+		-- 1. Nút Close (Màu Đỏ - Ngoài cùng bên phải)
+		TitleBar.CloseButton = BarButton(nil, UDim2.new(1, -20, 0, 13), TitleBar.Frame, function()
 			Library.Window:Dialog({
 				Title = "Close",
 				Content = "Are you sure you want to unload the interface?",
 				Buttons = {
-					{
-						Title = "Yes",
-						Callback = function()
-							Library:Destroy()
-						end,
-					},
-					{
-						Title = "No",
-					},
+					{ Title = "Yes", Callback = function() Library:Destroy() end },
+					{ Title = "No" },
 				},
 			})
 		end)
-		-- Chỉnh giao diện cho nút Close
-		TitleBar.CloseButton.Frame.BackgroundColor3 = Color3.fromRGB(255, 95, 87) -- Đỏ Mac
-		TitleBar.CloseButton.Frame.BackgroundTransparency = 0 -- Hiện nền màu
-		TitleBar.CloseButton.Frame.Size = UDim2.fromOffset(12, 12) -- Kích thước nhỏ gọn
-		TitleBar.CloseButton.Frame.UICorner.CornerRadius = UDim.new(1, 0) -- Bo tròn thành hình tròn
-		TitleBar.CloseButton.Frame.Icon.Visible = false -- Ẩn icon X đi
+		-- Cấu hình giao diện Close
+		local CloseFrame = TitleBar.CloseButton.Frame
+		CloseFrame.ThemeTag = {} -- Xóa theme để không bị đổi màu
+		CloseFrame.BackgroundColor3 = Color3.fromRGB(255, 95, 87) -- Màu Đỏ
+		CloseFrame.BackgroundTransparency = 0 -- Hiện màu rõ ràng
+		CloseFrame.Size = UDim2.fromOffset(12, 12) -- Hình tròn nhỏ
+		CloseFrame.UICorner.CornerRadius = UDim.new(1, 0) -- Bo tròn tuyệt đối
+		if CloseFrame:FindFirstChild("Icon") then CloseFrame.Icon.Visible = false end -- Tắt dấu X
 
-		-- 2. Nút Minimize (Màu Vàng - Ở giữa)
-		TitleBar.MinButton = BarButton(nil, UDim2.new(0, 28, 0, 13), TitleBar.Frame, function()
-			Library.Window:Minimize()
-		end)
-		TitleBar.MinButton.Frame.BackgroundColor3 = Color3.fromRGB(255, 189, 46) -- Vàng Mac
-		TitleBar.MinButton.Frame.BackgroundTransparency = 0
-		TitleBar.MinButton.Frame.Size = UDim2.fromOffset(12, 12)
-		TitleBar.MinButton.Frame.UICorner.CornerRadius = UDim.new(1, 0)
-		TitleBar.MinButton.Frame.Icon.Visible = false
-
-		-- 3. Nút Maximize (Màu Xanh - Trong cùng)
-		TitleBar.MaxButton = BarButton(nil, UDim2.new(0, 46, 0, 13), TitleBar.Frame, function()
+		-- 2. Nút Maximize (Màu Xanh - Kế nút đỏ)
+		TitleBar.MaxButton = BarButton(nil, UDim2.new(1, -40, 0, 13), TitleBar.Frame, function()
 			Config.Window.Maximize(not Config.Window.Maximized)
 		end)
-		TitleBar.MaxButton.Frame.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Xanh Mac
-		TitleBar.MaxButton.Frame.BackgroundTransparency = 0
-		TitleBar.MaxButton.Frame.Size = UDim2.fromOffset(12, 12)
-		TitleBar.MaxButton.Frame.UICorner.CornerRadius = UDim.new(1, 0)
-		TitleBar.MaxButton.Frame.Icon.Visible = false
+		-- Cấu hình giao diện Maximize
+		local MaxFrame = TitleBar.MaxButton.Frame
+		MaxFrame.ThemeTag = {}
+		MaxFrame.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Màu Xanh
+		MaxFrame.BackgroundTransparency = 0
+		MaxFrame.Size = UDim2.fromOffset(12, 12)
+		MaxFrame.UICorner.CornerRadius = UDim.new(1, 0)
+		if MaxFrame:FindFirstChild("Icon") then MaxFrame.Icon.Visible = false end -- Tắt dấu +
+
+		-- 3. Nút Minimize (Màu Vàng - Trong cùng)
+		TitleBar.MinButton = BarButton(nil, UDim2.new(1, -60, 0, 13), TitleBar.Frame, function()
+			Library.Window:Minimize()
+		end)
+		-- Cấu hình giao diện Minimize
+		local MinFrame = TitleBar.MinButton.Frame
+		MinFrame.ThemeTag = {}
+		MinFrame.BackgroundColor3 = Color3.fromRGB(255, 189, 46) -- Màu Vàng
+		MinFrame.BackgroundTransparency = 0
+		MinFrame.Size = UDim2.fromOffset(12, 12)
+		MinFrame.UICorner.CornerRadius = UDim.new(1, 0)
+		if MinFrame:FindFirstChild("Icon") then MinFrame.Icon.Visible = false end -- Tắt dấu -
+
+		-- ==========================================================
+		-- END CUSTOM BUTTONS
+		-- ==========================================================
 
 		return TitleBar
 	end
