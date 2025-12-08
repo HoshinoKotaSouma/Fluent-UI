@@ -4021,59 +4021,160 @@ Components.TitleBar = (function()
 				},
 			}),
 		})
--- ==========================================================
-		-- START: CUSTOM BUTTONS (MAC STYLE ON RIGHT SIDE)
-		-- ==========================================================
+Components.TitleBar = (function()
+	local New = Creator.New
+	local AddSignal = Creator.AddSignal
 
-		-- 1. Nút Close (Màu Đỏ - Ngoài cùng bên phải)
-		TitleBar.CloseButton = BarButton(nil, UDim2.new(1, -20, 0, 13), TitleBar.Frame, function()
-			Library.Window:Dialog({
-				Title = "Close",
-				Content = "Are you sure you want to unload the interface?",
-				Buttons = {
-					{ Title = "Yes", Callback = function() Library:Destroy() end },
-					{ Title = "No" },
-				},
+	return function(Config)
+		local TitleBar = {}
+
+		-- Hàm tạo nút tùy chỉnh (Custom Button Creator)
+		local function CustomBarButton(Props)
+			local Button = {
+				Callback = Props.Callback or function() end,
+			}
+
+			Button.Frame = New("TextButton", {
+				Size = UDim2.fromOffset(12, 12), -- Kích thước tròn 12px
+				AnchorPoint = Vector2.new(1, 0.5), -- Neo bên phải, giữa theo chiều dọc
+				Position = Props.Position, -- Vị trí do mình truyền vào
+				BackgroundColor3 = Props.Color, -- Màu sắc do mình truyền vào
+				BackgroundTransparency = 0, -- Hiện màu nền
+				Parent = Props.Parent,
+				Text = "",
+				AutoButtonColor = false, -- Tắt hiệu ứng nhấp nháy mặc định
+			}, {
+				New("UICorner", {
+					CornerRadius = UDim.new(1, 0), -- Bo tròn tuyệt đối
+				}),
+				-- Không thêm Icon hay ThemeTag để tránh xung đột
 			})
-		end)
-		-- Cấu hình giao diện Close
-		local CloseFrame = TitleBar.CloseButton.Frame
-		CloseFrame.ThemeTag = {} -- Xóa theme để không bị đổi màu
-		CloseFrame.BackgroundColor3 = Color3.fromRGB(255, 95, 87) -- Màu Đỏ
-		CloseFrame.BackgroundTransparency = 0 -- Hiện màu rõ ràng
-		CloseFrame.Size = UDim2.fromOffset(12, 12) -- Hình tròn nhỏ
-		CloseFrame.UICorner.CornerRadius = UDim.new(1, 0) -- Bo tròn tuyệt đối
-		if CloseFrame:FindFirstChild("Icon") then CloseFrame.Icon.Visible = false end -- Tắt dấu X
 
-		-- 2. Nút Maximize (Màu Xanh - Kế nút đỏ)
-		TitleBar.MaxButton = BarButton(nil, UDim2.new(1, -40, 0, 13), TitleBar.Frame, function()
-			Config.Window.Maximize(not Config.Window.Maximized)
-		end)
-		-- Cấu hình giao diện Maximize
-		local MaxFrame = TitleBar.MaxButton.Frame
-		MaxFrame.ThemeTag = {}
-		MaxFrame.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Màu Xanh
-		MaxFrame.BackgroundTransparency = 0
-		MaxFrame.Size = UDim2.fromOffset(12, 12)
-		MaxFrame.UICorner.CornerRadius = UDim.new(1, 0)
-		if MaxFrame:FindFirstChild("Icon") then MaxFrame.Icon.Visible = false end -- Tắt dấu +
+			-- Hiệu ứng Hover đơn giản (Làm sáng màu lên chút xíu)
+			AddSignal(Button.Frame.MouseEnter, function()
+				Button.Frame.Transparency = 0.2
+			end)
+			AddSignal(Button.Frame.MouseLeave, function()
+				Button.Frame.Transparency = 0
+			end)
+			AddSignal(Button.Frame.MouseButton1Click, Button.Callback)
 
-		-- 3. Nút Minimize (Màu Vàng - Trong cùng)
-		TitleBar.MinButton = BarButton(nil, UDim2.new(1, -60, 0, 13), TitleBar.Frame, function()
-			Library.Window:Minimize()
-		end)
-		-- Cấu hình giao diện Minimize
-		local MinFrame = TitleBar.MinButton.Frame
-		MinFrame.ThemeTag = {}
-		MinFrame.BackgroundColor3 = Color3.fromRGB(255, 189, 46) -- Màu Vàng
-		MinFrame.BackgroundTransparency = 0
-		MinFrame.Size = UDim2.fromOffset(12, 12)
-		MinFrame.UICorner.CornerRadius = UDim.new(1, 0)
-		if MinFrame:FindFirstChild("Icon") then MinFrame.Icon.Visible = false end -- Tắt dấu -
+			return Button
+		end
 
-		-- ==========================================================
-		-- END CUSTOM BUTTONS
-		-- ==========================================================
+		TitleBar.Frame = New("Frame", {
+			Size = UDim2.new(1, 0, 0, 42),
+			BackgroundTransparency = 1,
+			Parent = Config.Parent,
+		}, {
+			New("Frame", {
+				Size = UDim2.new(1, -16, 1, 0),
+				Position = UDim2.new(0, 12, 0, 0), -- Title nằm bên trái (12px)
+				BackgroundTransparency = 1,
+			}, {
+				New("UIListLayout", {
+					Padding = UDim.new(0, 5),
+					FillDirection = Enum.FillDirection.Horizontal,
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+				}),
+				Config.Icon and New("ImageLabel", {
+					Image = Config.Icon,
+					Size = UDim2.fromOffset(20, 20),
+					BackgroundTransparency = 1,
+					LayoutOrder = 1,
+					ThemeTag = {
+						ImageColor3 = "Text",
+					},
+				}) or nil,
+				New("TextLabel", {
+					RichText = true,
+					Text = Config.Title,
+					FontFace = Font.new(
+						"rbxasset://fonts/families/GothamSSm.json",
+						Enum.FontWeight.Regular,
+						Enum.FontStyle.Normal
+					),
+					TextSize = 12,
+					TextXAlignment = "Left",
+					TextYAlignment = "Center",
+					Size = UDim2.fromScale(0, 1),
+					AutomaticSize = Enum.AutomaticSize.X,
+					BackgroundTransparency = 1,
+					LayoutOrder = 2,
+					ThemeTag = {
+						TextColor3 = "Text",
+					},
+				}),
+				Config.SubTitle and New("TextLabel", {
+					RichText = true,
+					Text = Config.SubTitle,
+					TextTransparency = 0.4,
+					FontFace = Font.new(
+						"rbxasset://fonts/families/GothamSSm.json",
+						Enum.FontWeight.Regular,
+						Enum.FontStyle.Normal
+					),
+					TextSize = 12,
+					TextXAlignment = "Left",
+					TextYAlignment = "Center",
+					Size = UDim2.fromScale(0, 1),
+					AutomaticSize = Enum.AutomaticSize.X,
+					BackgroundTransparency = 1,
+					LayoutOrder = 3,
+					ThemeTag = {
+						TextColor3 = "Text",
+					},
+				}) or nil,
+			}),
+			New("Frame", {
+				BackgroundTransparency = 0.5,
+				Size = UDim2.new(1, 0, 0, 1),
+				Position = UDim2.new(0, 0, 1, 0),
+				ThemeTag = {
+					BackgroundColor3 = "TitleBarLine",
+				},
+			}),
+		})
+
+		-- === KHỞI TẠO NÚT (MAC STYLE - BÊN PHẢI) ===
+		
+		-- 1. Close (Đỏ) - Ngoài cùng bên phải (-10px)
+		TitleBar.CloseButton = CustomBarButton({
+			Parent = TitleBar.Frame,
+			Position = UDim2.new(1, -10, 0.5, 0), 
+			Color = Color3.fromRGB(255, 95, 87),
+			Callback = function()
+				Library.Window:Dialog({
+					Title = "Close",
+					Content = "Are you sure you want to unload the interface?",
+					Buttons = {
+						{ Title = "Yes", Callback = function() Library:Destroy() end },
+						{ Title = "No" },
+					},
+				})
+			end,
+		})
+
+		-- 2. Maximize (Xanh lá) - Cách nút đỏ 20px (-30px)
+		TitleBar.MaxButton = CustomBarButton({
+			Parent = TitleBar.Frame,
+			Position = UDim2.new(1, -30, 0.5, 0),
+			Color = Color3.fromRGB(39, 201, 63),
+			Callback = function()
+				Config.Window.Maximize(not Config.Window.Maximized)
+			end,
+		})
+
+		-- 3. Minimize (Vàng) - Cách nút xanh 20px (-50px)
+		TitleBar.MinButton = CustomBarButton({
+			Parent = TitleBar.Frame,
+			Position = UDim2.new(1, -50, 0.5, 0),
+			Color = Color3.fromRGB(255, 189, 46),
+			Callback = function()
+				Library.Window:Minimize()
+			end,
+		})
 
 		return TitleBar
 	end
