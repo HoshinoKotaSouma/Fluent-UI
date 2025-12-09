@@ -4056,11 +4056,12 @@ Components.Window = (function()
 
 		Window.AcrylicPaint = Acrylic.AcrylicPaint()
 
-		local function CenterWindow()
-			local vp = Camera.ViewportSize
-			local x = math.max(0, (vp.X - Window.Size.X.Offset) / 2)
-			local y = math.max(0, (vp.Y - Window.Size.Y.Offset) / 2)
-			Window.Position = UDim2.fromOffset(math.floor(x), math.floor(y))
+local function CenterWindow()
+    local vp = Camera.ViewportSize
+    -- Sửa đoạn này: Lấy chiều rộng màn hình trừ đi chiều rộng cửa sổ và lề (50px)
+    local x = vp.X - Window.Size.X.Offset - 50 
+    local y = math.max(0, (vp.Y - Window.Size.Y.Offset) / 2)
+    Window.Position = UDim2.fromOffset(math.floor(x), math.floor(y))
 			if Window.Root then
 				Window.Root.Position = Window.Position
 			end
@@ -9836,7 +9837,7 @@ function Library:CreateMinimizer(Config)
 
 			},
 
-
+ClipsDescendants = true,
 		}, {
 
 
@@ -9876,7 +9877,7 @@ function Library:CreateMinimizer(Config)
 				Image = iconAsset,
 
 
-				Size = UDim2.new(0.8, 0, 0.8, 0),
+				Size = UDim2.fromScale(1, 1),
 
 
 				Position = UDim2.new(0.5, 0, 0.5, 0),
