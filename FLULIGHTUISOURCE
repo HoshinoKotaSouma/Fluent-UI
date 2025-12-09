@@ -3872,193 +3872,55 @@ Components.TitleBar = (function()
 	local New = Creator.New
 	local AddSignal = Creator.AddSignal
 
-	local function parseColor(value)
-		if typeof(value) == "Color3" then return value end
-		if typeof(value) == "string" then
-			local hex = value:gsub("#","")
-			if #hex == 6 then
-				local r = tonumber(hex:sub(1,2), 16) or 255
-				local g = tonumber(hex:sub(3,4), 16) or 255
-				local b = tonumber(hex:sub(5,6), 16) or 255
-				return Color3.fromRGB(r,g,b)
-			end
-		end
-		return Themes[Library.Theme].SubText or Color3.fromRGB(170,170,170)
-	end
-
 	return function(Config)
 		local TitleBar = {}
 
-		local function BarButton(Icon, Pos, Parent, Callback)
-			local Button = {
-				Callback = Callback or function() end,
-			}
-
-			Button.Frame = New("TextButton", {
-				Size = UDim2.new(0, 34, 1, -8),
-				AnchorPoint = Vector2.new(1, 0),
-				BackgroundTransparency = 1,
-				Parent = Parent,
-				Position = Pos,
-				Text = "",
-				ThemeTag = {
-					BackgroundColor3 = "Text",
-				},
-			}, {
-				New("UICorner", {
-					CornerRadius = UDim.new(0, 7),
-				}),
-				New("ImageLabel", {
-					Image = Icon,
-					Size = UDim2.fromOffset(16, 16),
-					Position = UDim2.fromScale(0.5, 0.5),
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundTransparency = 1,
-					Name = "Icon",
-					ThemeTag = {
-						ImageColor3 = "Text",
-					},
-				}),
-			})
-
-			local Motor, SetTransparency = Creator.SpringMotor(1, Button.Frame, "BackgroundTransparency")
-
-			AddSignal(Button.Frame.MouseEnter, function()
-				SetTransparency(0.94)
-			end)
-			AddSignal(Button.Frame.MouseLeave, function()
-				SetTransparency(1, true)
-			end)
-			AddSignal(Button.Frame.MouseButton1Down, function()
-				SetTransparency(0.96)
-			end)
-			AddSignal(Button.Frame.MouseButton1Up, function()
-				SetTransparency(0.94)
-			end)
-			AddSignal(Button.Frame.MouseButton1Click, Button.Callback)
-
-			Button.SetCallback = function(Func)
-				Button.Callback = Func
-			end
-
-			return Button
-		end
-
-		TitleBar.Frame = New("Frame", {
-			Size = UDim2.new(1, 0, 0, 42),
-			BackgroundTransparency = 1,
-			Parent = Config.Parent,
-		}, {
-			New("Frame", {
-				Size = UDim2.new(1, -16, 1, 0),
-				Position = UDim2.new(0, 12, 0, 0),
-				BackgroundTransparency = 1,
-			}, {
-				New("UIListLayout", {
-					Padding = UDim.new(0, 5),
-					FillDirection = Enum.FillDirection.Horizontal,
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-				}),
-
-				Config.Icon and New("ImageLabel", {
-					Image = Config.Icon,
-					Size = UDim2.fromOffset(20, 20),
-					BackgroundTransparency = 1,
-					LayoutOrder = 1,
-					ThemeTag = {
-						ImageColor3 = "Text",
-					},
-				}) or nil,
-
-				New("TextLabel", {
-					RichText = true,
-					Text = Config.Title,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.fromScale(0, 1),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = Config.Icon and 2 or 1,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
-				}),
-				Config.SubTitle and New("TextLabel", {
-					RichText = true,
-					Text = Config.SubTitle,
-					TextTransparency = 0.4,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.fromScale(0, 1),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = Config.Icon and 3 or 2,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
-				}) or nil,
-
-			}),
-			New("Frame", {
-				BackgroundTransparency = 0.5,
-				Size = UDim2.new(1, 0, 0, 1),
-				Position = UDim2.new(0, 0, 1, 0),
-				ThemeTag = {
-					BackgroundColor3 = "TitleBarLine",
-				},
-			}),
-		})
-Components.TitleBar = (function()
-	local New = Creator.New
-	local AddSignal = Creator.AddSignal
-
-	return function(Config)
-		local TitleBar = {}
-
-		-- Hàm tạo nút tùy chỉnh (Custom Button Creator)
+		-- Hàm tạo nút tùy chỉnh (Phong cách macOS xịn)
 		local function CustomBarButton(Props)
-			local Button = {
-				Callback = Props.Callback or function() end,
-			}
-
+			local Button = {}
+			
 			Button.Frame = New("TextButton", {
-				Size = UDim2.fromOffset(12, 12), -- Kích thước tròn 12px
-				AnchorPoint = Vector2.new(1, 0.5), -- Neo bên phải, giữa theo chiều dọc
-				Position = Props.Position, -- Vị trí do mình truyền vào
-				BackgroundColor3 = Props.Color, -- Màu sắc do mình truyền vào
-				BackgroundTransparency = 0, -- Hiện màu nền
 				Parent = Props.Parent,
+				Size = UDim2.fromOffset(12, 12), -- Kích thước tròn 12px
+				Position = Props.Position,
+				AnchorPoint = Vector2.new(0, 0.5), -- Neo bên trái
+				BackgroundColor3 = Props.Color,
+				BackgroundTransparency = 0,
 				Text = "",
-				AutoButtonColor = false, -- Tắt hiệu ứng nhấp nháy mặc định
+				AutoButtonColor = false,
+				Name = Props.Name,
+				ClipsDescendants = true
 			}, {
-				New("UICorner", {
-					CornerRadius = UDim.new(1, 0), -- Bo tròn tuyệt đối
-				}),
-				-- Không thêm Icon hay ThemeTag để tránh xung đột
+				New("UICorner", { CornerRadius = UDim.new(1, 0) }), -- Bo tròn thành hình tròn
+				
+				-- Ký tự bên trong (x, -, +)
+				New("TextLabel", {
+					Name = "Symbol",
+					Text = Props.Symbol or "",
+					Parent = Props.Parent,
+					Size = UDim2.fromScale(1, 1),
+					BackgroundTransparency = 1,
+					TextColor3 = Color3.fromRGB(50, 50, 50), -- Màu chữ đen mờ
+					TextTransparency = 0.5,
+					TextSize = 9,
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+					Visible = false -- Mặc định ẩn
+				})
 			})
+			
+			local Symbol = Button.Frame:FindFirstChild("Symbol")
 
-			-- Hiệu ứng Hover đơn giản (Làm sáng màu lên chút xíu)
-			AddSignal(Button.Frame.MouseEnter, function()
-				Button.Frame.Transparency = 0.2
+			-- Hiệu ứng Hover: Di chuột vào mới hiện ký tự
+			AddSignal(Button.Frame.MouseEnter, function() 
+				Button.Frame.Transparency = 0.2 
+				if Symbol then Symbol.Visible = true end
 			end)
-			AddSignal(Button.Frame.MouseLeave, function()
-				Button.Frame.Transparency = 0
+			AddSignal(Button.Frame.MouseLeave, function() 
+				Button.Frame.Transparency = 0 
+				if Symbol then Symbol.Visible = false end
 			end)
-			AddSignal(Button.Frame.MouseButton1Click, Button.Callback)
-
+			AddSignal(Button.Frame.MouseButton1Click, Props.Callback)
+			
 			return Button
 		end
 
@@ -4067,9 +3929,10 @@ Components.TitleBar = (function()
 			BackgroundTransparency = 1,
 			Parent = Config.Parent,
 		}, {
+			-- Phần Tiêu Đề (Title) - Dời sang phải 80px
 			New("Frame", {
-				Size = UDim2.new(1, -16, 1, 0),
-				Position = UDim2.new(0, 12, 0, 0), -- Title nằm bên trái (12px)
+				Size = UDim2.new(1, -80, 1, 0),
+				Position = UDim2.new(0, 80, 0, 0), 
 				BackgroundTransparency = 1,
 			}, {
 				New("UIListLayout", {
@@ -4083,18 +3946,12 @@ Components.TitleBar = (function()
 					Size = UDim2.fromOffset(20, 20),
 					BackgroundTransparency = 1,
 					LayoutOrder = 1,
-					ThemeTag = {
-						ImageColor3 = "Text",
-					},
+					ThemeTag = { ImageColor3 = "Text" },
 				}) or nil,
 				New("TextLabel", {
 					RichText = true,
 					Text = Config.Title,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
 					TextSize = 12,
 					TextXAlignment = "Left",
 					TextYAlignment = "Center",
@@ -4102,19 +3959,13 @@ Components.TitleBar = (function()
 					AutomaticSize = Enum.AutomaticSize.X,
 					BackgroundTransparency = 1,
 					LayoutOrder = 2,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
+					ThemeTag = { TextColor3 = "Text" },
 				}),
 				Config.SubTitle and New("TextLabel", {
 					RichText = true,
 					Text = Config.SubTitle,
 					TextTransparency = 0.4,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
 					TextSize = 12,
 					TextXAlignment = "Left",
 					TextYAlignment = "Center",
@@ -4122,28 +3973,26 @@ Components.TitleBar = (function()
 					AutomaticSize = Enum.AutomaticSize.X,
 					BackgroundTransparency = 1,
 					LayoutOrder = 3,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
+					ThemeTag = { TextColor3 = "Text" },
 				}) or nil,
 			}),
 			New("Frame", {
 				BackgroundTransparency = 0.5,
 				Size = UDim2.new(1, 0, 0, 1),
 				Position = UDim2.new(0, 0, 1, 0),
-				ThemeTag = {
-					BackgroundColor3 = "TitleBarLine",
-				},
+				ThemeTag = { BackgroundColor3 = "TitleBarLine" },
 			}),
 		})
 
-		-- === KHỞI TẠO NÚT (MAC STYLE - BÊN PHẢI) ===
+		-- === CÁC NÚT ĐIỀU KHIỂN (MAC OS) ===
 		
-		-- 1. Close (Đỏ) - Ngoài cùng bên phải (-10px)
+		-- 1. Close (Đỏ) - Ngoài cùng bên trái
 		TitleBar.CloseButton = CustomBarButton({
+			Name = "Close",
 			Parent = TitleBar.Frame,
-			Position = UDim2.new(1, -10, 0.5, 0), 
+			Position = UDim2.new(0, 15, 0.5, 0),
 			Color = Color3.fromRGB(255, 95, 87),
+			Symbol = "×",
 			Callback = function()
 				Library.Window:Dialog({
 					Title = "Close",
@@ -4156,23 +4005,27 @@ Components.TitleBar = (function()
 			end,
 		})
 
-		-- 2. Maximize (Xanh lá) - Cách nút đỏ 20px (-30px)
-		TitleBar.MaxButton = CustomBarButton({
+		-- 2. Minimize (Vàng) - Kế bên nút đỏ
+		TitleBar.MinButton = CustomBarButton({
+			Name = "Min",
 			Parent = TitleBar.Frame,
-			Position = UDim2.new(1, -30, 0.5, 0),
-			Color = Color3.fromRGB(39, 201, 63),
+			Position = UDim2.new(0, 35, 0.5, 0),
+			Color = Color3.fromRGB(255, 189, 46),
+			Symbol = "−",
 			Callback = function()
-				Config.Window.Maximize(not Config.Window.Maximized)
+				Library.Window:Minimize()
 			end,
 		})
 
-		-- 3. Minimize (Vàng) - Cách nút xanh 20px (-50px)
-		TitleBar.MinButton = CustomBarButton({
+		-- 3. Maximize (Xanh) - Kế bên nút vàng
+		TitleBar.MaxButton = CustomBarButton({
+			Name = "Max",
 			Parent = TitleBar.Frame,
-			Position = UDim2.new(1, -50, 0.5, 0),
-			Color = Color3.fromRGB(255, 189, 46),
+			Position = UDim2.new(0, 55, 0.5, 0),
+			Color = Color3.fromRGB(39, 201, 63),
+			Symbol = "+",
 			Callback = function()
-				Library.Window:Minimize()
+				Config.Window.Maximize(not Config.Window.Maximized)
 			end,
 		})
 
@@ -9697,25 +9550,21 @@ end
 
 
 Library.CreateWindow = function(self, Config)
+    assert(Config.Title, "Window - Missing Title")
 
+    -- [!] THÊM ĐOẠN NÀY ĐỂ ÉP UI NGANG NHƯ STARLIGHT [!]
+    -- Kích thước chuẩn Starlight thường là khoảng 800x450 hoặc 900x500
+    Config.Size = UDim2.fromOffset(850, 500) 
+    
+    -- Tự động chỉnh độ rộng thanh Tab cho cân đối với giao diện ngang
+    if not Config.TabWidth then Config.TabWidth = 180 end 
+    -- [!] HẾT PHẦN THÊM [!]
 
-	assert(Config.Title, "Window - Missing Title")
-
-
-
-
-
-	if Library.Window then
-
-
-		print("You cannot create more than one window.")
-
-
-		return
-
-
-	end
-
+    if Library.Window then
+        print("You cannot create more than one window.")
+        return
+    end
+  -- ... (Code cũ giữ nguyên)
 
 
 
